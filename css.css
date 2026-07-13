@@ -1,0 +1,26 @@
+#totemHeader{
+    background:#1f3a5f;
+    color:white;
+    padding:20px 40px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+	height: 140px;
+	position: fixed;
+	z-index: 5000;
+	width: 100%;
+}
+.logo{
+    font-size:1.8rem;
+    font-weight:bold;
+	display: flex;
+	align-items: center;
+	gap:12px;
+}
+
+.logo-img{
+	height: 100px;
+	width: auto;
+	object-fit:contain;
+}

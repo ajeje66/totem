@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Libro Sfogliabile PDF</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/css/page-flip.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+
+body{
+    margin:0;
+    background:#2b2b2b;
+    font-family:Segoe UI,sans-serif;
+
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+
+}
+
+
+#toolbar{
+    position:fixed;
+
+    top:15px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:9999;
+
+    background:rgba(30,30,30,.85);
+
+    backdrop-filter:blur(12px);
+
+    border:1px solid rgba(255,255,255,.1);
+
+    border-radius:18px;
+
+    padding:10px 15px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.4);
+}
+
+#toolbar button{
+
+    width:48px;
+    height:48px;
+
+    border:none;
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    color:white;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+#toolbar button:hover{
+
+    background:rgba(255,255,255,.18);
+
+    transform:translateY(-2px);
+}
+
+
+#pageInfo{
+    color:white;
+    min-width:150px;
+    text-align:center;
+}
+
+#sliderContainer{
+
+    background:#1f1f1f;
+
+    padding:10px 20px;
+}
+
+#pageSlider{
+
+    width:100%;
+    cursor:pointer;
+}
+
+button{
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+#book-container{
+    flex:1;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+#flipbook{
+    width:1000px;
+    height:700px;
+}
+
+.page{
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+.page canvas{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+.stf__parent{
+    box-shadow:
+    0 0 50px rgba(0,0,0,.6);
+
+    border-radius:10px;
+}
+
+.page{
+    background:white;
+
+    box-shadow:
+    inset 0 0 20px rgba(0,0,0,.1);
+}
+#zoomContainer{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:white;
+}
+
+#zoomSlider{
+    width:150px;
+}
+
+#zoomValue{
+    min-width:60px;
+    text-align:center;
+}
+input[type="range"]{
+
+    appearance:none;
+
+    height:6px;
+
+    border-radius:10px;
+
+    background:#555;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+
+    appearance:none;
+
+    width:18px;
+    height:18px;
+
+    border-radius:50%;
+
+    background:white;
+
+    cursor:pointer;
+}
+#book-wrapper{
+    transform-origin:center center;
+    transition:transform .2s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+
+    <button id="prevBtn">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+
+    <span id="pageInfo">
+        Pagina 1 / 100
+    </span>
+
+    <button id="nextBtn">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+
+    <button id="zoomOut">
+		<i class="fa-solid fa-magnifying-glass-minus"></i>
+	</button>
+    <button id="zoomIn">
+		<i class="fa-solid fa-magnifying-glass-plus"></i>
+	</button>
+	<div id="zoomContainer">
+
+    <span>🔍</span>
+
+    <input
+        type="range"
+        id="zoomSlider"
+        min="50"
+        max="300"
+        value="100"
+        step="10">
+
+    <span id="zoomValue">100%</span>
+
+	</div>
+
+    <button id="fullscreenBtn">
+		<i class="fa-solid fa-expand"></i>
+	</button>
+
+</div>
+
+
+<div id="book-container">
+	<div id="book-wrapper">
+		<div id="flipbook"></div>
+	</div>
+</div>
+
+<div id="sliderContainer">
+    <input
+        type="range"
+        id="pageSlider"
+        min="1"
+        max="100"
+        value="1">
+</div>
+
+
+<script>
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const PDF_FILE = "libro.pdf";
+
+let pageFlip;
+let totalPages = 0;
+let zoom = 1;
+const zoomSlider = document.getElementById("zoomSlider");
+const zoomValue = document.getElementById("zoomValue");
+
+let pdfDoc;
+let renderedPages = {};
+
+async function renderPage(num){
+
+    if(renderedPages[num]) return;
+
+
+    const pageDiv =
+        document.querySelector(
+            `.page[data-page="${num}"]`
+        );
+
+
+    if(!pageDiv) return;
+
+
+    const page =
+        await pdfDoc.getPage(num);
+
+
+    const viewport =
+        page.getViewport({
+            scale:2
+        });
+
+
+    const canvas =
+        document.createElement("canvas");
+
+
+    const context =
+        canvas.getContext("2d");
+
+
+    canvas.width =
+        viewport.width;
+
+    canvas.height =
+        viewport.height;
+
+
+    await page.render({
+
+        canvasContext:context,
+
+        viewport:viewport
+
+    }).promise;
+
+
+    pageDiv.appendChild(canvas);
+
+
+    renderedPages[num]=true;
+
+}
+function renderAroundPage(current){
+
+
+    const range = 5;
+
+
+    for(
+        let i=current-range;
+        i<=current+range;
+        i++
+    ){
+
+        if(i>=1 && i<=totalPages){
+
+            renderPage(i);
+
+        }
+
+    }
+
+}
+
+async function loadPDF(){
+
+    pdfDoc = await pdfjsLib.getDocument(PDF_FILE).promise;
+
+    totalPages = pdfDoc.numPages;
+
+    const flipbook = document.getElementById("flipbook");
+
+    // crea solo i contenitori vuoti
+    for(let i=1;i<=totalPages;i++){
+
+        const pageDiv = document.createElement("div");
+
+        pageDiv.className="page";
+
+        pageDiv.dataset.page=i;
+
+        flipbook.appendChild(pageDiv);
+    }
+
+
+    initFlipBook();
+
+    // renderizza solo le prime pagine
+    renderAroundPage(1);
+}
+
+function initFlipBook(){
+
+    pageFlip = new St.PageFlip(
+        document.getElementById("flipbook"),
+        {
+            width:500,
+            height:700,
+            size:"stretch",
+            minWidth:300,
+            maxWidth:1200,
+            minHeight:400,
+            maxHeight:1600,
+            showCover:true,
+            mobileScrollSupport:true,
+            useMouseEvents:true,
+            flippingTime:700,
+            startPage:0
+        }
+    );
+
+    pageFlip.loadFromHTML(
+        document.querySelectorAll(".page")
+    );
+
+    pageSlider.max = totalPages;
+
+    updatePageInfo();
+
+    pageFlip.on("flip", () => {
+
+		let current =
+			pageFlip.getCurrentPageIndex()+1;
+	
+	
+		pageSlider.value=current;
+	
+	
+		document.getElementById("pageInfo").textContent =
+			`Pagina ${current} / ${totalPages}`;
+	
+	
+		renderAroundPage(current);
+
+	});
+}
+updateZoom();
+
+function updatePageInfo(){
+
+    if(!pageFlip) return;
+
+    document.getElementById("pageInfo").textContent =
+        "Pagina " +
+        (pageFlip.getCurrentPageIndex()+1) +
+        " / " +
+        totalPages;
+}
+
+document.getElementById("prevBtn")
+.addEventListener("click",()=>{
+
+    if(pageFlip)
+        pageFlip.flipPrev();
+});
+
+document.getElementById("nextBtn")
+.addEventListener("click",()=>{
+
+    if(pageFlip)
+        pageFlip.flipNext();
+});
+
+loadPDF();
+
+
+
+function updateZoom(){
+
+    document
+        document
+		.getElementById("flipbook")
+        .style.transform =
+            `scale(${zoom})`;
+
+    zoomSlider.value = Math.round(zoom * 100);
+
+    zoomValue.textContent =
+        Math.round(zoom * 100) + "%";
+}
+
+document
+.getElementById("zoomIn")
+.addEventListener("click", ()=>{
+
+    zoom = Math.min(3, zoom + 0.1);
+
+    updateZoom();
+});
+document
+.getElementById("zoomOut")
+.addEventListener("click", ()=>{
+
+    zoom = Math.max(0.5, zoom - 0.1);
+
+    updateZoom();
+});
+
+
+document
+.getElementById("zoomIn")
+.addEventListener("click",()=>{
+
+    zoom += 0.1;
+
+    document
+    .querySelector("#flipbook")
+    .style.transform =
+        `scale(${zoom})`;
+});
+
+document
+.getElementById("zoomOut")
+.addEventListener("click",()=>{
+
+    zoom = Math.max(0.5,zoom-0.1);
+
+    document
+    .querySelector("#flipbook")
+    .style.transform =
+        `scale(${zoom})`;
+});
+zoomSlider.addEventListener("input", ()=>{
+
+    zoom = zoomSlider.value / 100;
+
+    zoomValue.textContent =
+        zoomSlider.value + "%";
+
+    rebuildBook();
+});
+
+
+document
+.getElementById("pageSlider")
+.addEventListener("input", ()=>{
+
+    if(pageFlip){
+
+        pageFlip.flip(
+            parseInt(
+                document.getElementById("pageSlider").value
+            ) - 1
+        );
+    }
+});
+
+document
+.getElementById("fullscreenBtn")
+.addEventListener("click", ()=>{
+    document.documentElement.requestFullscreen();
+});
+
+zoomSlider.addEventListener("input", ()=>{
+
+    zoom = zoomSlider.value / 100;
+
+    updateZoom();
+});
+let baseWidth = 500;
+let baseHeight = 700;
+
+function rebuildBook() {
+
+    let currentPage = 0;
+
+    if (pageFlip) {
+        currentPage = pageFlip.getCurrentPageIndex();
+        pageFlip.destroy();
+    }
+
+    pageFlip = new St.PageFlip(
+        document.getElementById("flipbook"),
+        {
+            width: baseWidth * zoom,
+            height: baseHeight * zoom,
+
+            size: "fixed",
+
+            showCover: true,
+            flippingTime: 700
+        }
+    );
+
+    pageFlip.loadFromHTML(
+        document.querySelectorAll(".page")
+    );
+
+    pageFlip.flip(currentPage);
+}
+document.addEventListener("click", function(){
+    parent.postMessage("activity", "*");
+});
+
+
+document.addEventListener("touchstart", function(){
+    parent.postMessage("activity", "*");
+});
+
+// comunica attività al totem durante lo sfoglio del libro
+
+const flipbookActivity = document.getElementById("flipbook");
+
+[
+    "touchstart",
+    "touchmove",
+    "mousedown",
+    "mousemove",
+    "pointerdown",
+    "pointermove"
+].forEach(event => {
+
+    flipbookActivity.addEventListener(event, () => {
+
+        parent.postMessage({
+            type:"activity"
+        }, "*");
+
+    }, {passive:true});
+
+});
+function sendActivity(){
+
+    console.log("attività libro");
+
+    parent.postMessage(
+        {
+            type:"activity"
+        },
+        "*"
+    );
+}
+
+
+document.addEventListener("pointerdown", sendActivity);
+
+document.addEventListener("pointermove", sendActivity);
+
+document.addEventListener("touchstart", sendActivity);
+
+document.addEventListener("wheel", sendActivity);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Totem Multimediale</title>
+
+<style>
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: Arial, sans-serif;
+}
+
+#carousel {
+    position: absolute;
+    inset: 0;
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+
+    transform: translateY(100%);
+    transition: transform 0.8s ease-in-out;
+
+    z-index: 1;
+}
+
+.slide.active {
+    transform: translateY(0);
+    z-index: 2;
+}
+
+.slide.exit {
+    transform: translateY(-100%);
+    z-index: 1;
+}
+
+.slide img,
+.slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Area sensibile */
+#touchZone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20%;
+    height: 20%;
+    z-index: 100;
+    background: transparent;
+}
+
+/* Overlay iframe */
+#iframeOverlay {
+    position: absolute;
+    inset: 0;
+    background: white;
+    display: none;
+    z-index: 999;
+}
+
+#iframeOverlay iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#closeBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    padding: 12px 20px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#carousel,
+#iframeOverlay{
+    top:80px;
+    height:calc(100% - 80px);
+}
+
+body.iframe-open #totemHeader{
+    display:none;
+}
+
+body.iframe-open #iframeOverlay{
+    top:0;
+    height:100%;
+}
+
+#progressBar {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+
+    height: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+
+    z-index: 998;
+}
+
+#progressFill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+
+    background: linear-gradient(
+        90deg,
+        #00e5ff,
+        #00ff95
+    );
+
+    box-shadow:
+        0 0 8px rgba(0, 229, 255, 0.6),
+        0 0 14px rgba(0, 255, 149, 0.4);
+
+    transform-origin: left;
+}
+</style>
+</head>
+<link rel="stylesheet" href="css.css">
+<body>
+<div id="totemHeader" style="justify-content:center">
+	<div class="logo">
+        Mulino del principe 
+		<img class="logo-img" src="qr.png">
+    </div>
+    
+</div>
+<div id="carousel"></div>
+
+<div id="progressBar">
+	<div id="progressFill"></div>
+</div>
+
+<div id="iframeOverlay">
+    <iframe id="webFrame"></iframe>
+</div>
+
+<script>
+let progressAnim;
+let progressStart;
+let progressDuration;
+let progressRAF;
+// Configurazione contenuti
+
+const media = [
+    "media/1.jpg",
+    "media/2.jpg",
+	"media/video.mp4"
+];
+
+const slidesData = media.map(file => {
+
+    const isVideo = /\.(mp4|webm|ogg)$/i.test(file);
+
+    return {
+        type: isVideo ? "video" : "image",
+        src: `media/${file}`,
+        ...(isVideo ? {} : { duration: 3000 })
+    };
+
+});
+// URL da aprire nel touch
+const iframeUrl = "1.html";
+
+const carousel = document.getElementById("carousel");
+
+let currentIndex = 0;
+let timeout;
+let inactivityTimer;
+let countdownInterval;
+
+// Creazione slide
+slidesData.forEach((item, index) => {
+
+    const slide = document.createElement("div");
+    slide.className = "slide";
+
+    if(item.type === "image") {
+
+        const img = document.createElement("img");
+        img.src = item.src;
+        slide.appendChild(img);
+
+    } else {
+
+        const video = document.createElement("video");
+        video.src = item.src;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "auto";
+        slide.appendChild(video);
+    }
+
+    carousel.appendChild(slide);
+});
+
+const slides = document.querySelectorAll(".slide");
+
+
+function startProgress(type, media, duration) {
+
+    cancelAnimationFrame(progressRAF);
+
+    const fill = document.getElementById("progressFill");
+
+    const start = performance.now();
+
+    function update(now) {
+
+        let percent = 0;
+
+        if (type === "video") {
+
+            if (!media || !media.duration) {
+                progressRAF = requestAnimationFrame(update);
+                return;
+            }
+
+            percent = (media.currentTime / media.duration) * 100;
+
+        } else {
+
+            const elapsed = now - start;
+            percent = (elapsed / duration) * 100;
+        }
+
+        fill.style.width = Math.min(percent, 100) + "%";
+
+        progressRAF = requestAnimationFrame(update);
+    }
+
+    progressRAF = requestAnimationFrame(update);
+}
+
+function showSlide(index) {
+
+    clearTimeout(timeout);
+    cancelAnimationFrame(progressRAF);
+
+    const fill = document.getElementById("progressFill");
+    fill.style.width = "0%";
+
+    const previous = document.querySelector(".slide.active");
+
+    if (previous) {
+        const oldVideo = previous.querySelector("video");
+        if (oldVideo) oldVideo.pause();
+
+        previous.classList.remove("active");
+        previous.classList.add("exit");
+
+        setTimeout(() => {
+            previous.classList.remove("exit");
+        }, 800);
+    }
+
+    const slide = slides[index];
+    slide.classList.add("active");
+
+    const data = slidesData[index];
+
+    const progressBar = document.getElementById("progressBar");
+    progressBar.style.display = data.type === "video" ? "block" : "block"; 
+    // 👆 se vuoi anche immagini: lascia sempre "block"
+
+    if (data.type === "image") {
+
+        const duration = data.duration || 3000;
+
+        startProgress("image", null, duration);
+
+        timeout = setTimeout(nextSlide, duration);
+
+    } else {
+
+        const video = slide.querySelector("video");
+
+        video.currentTime = 0;
+        video.play();
+
+        startProgress("video", video);
+
+        video.onended = nextSlide;
+    }
+}
+
+function nextSlide() {
+
+    currentIndex++;
+
+    if(currentIndex >= slides.length)
+        currentIndex = 0;
+
+    showSlide(currentIndex);
+}
+
+// Avvio
+showSlide(0);
+
+// Apertura iframe
+const overlay = document.getElementById("iframeOverlay");
+const frame = document.getElementById("webFrame");
+
+carousel.addEventListener("click", () => {
+	openIframe();
+});
+
+function openIframe() {
+
+    frame.src = iframeUrl;
+    overlay.style.display = "block";
+	document.body.classList.add("iframe-open");
+    resetInactivity();
+}
+
+function closeIframe() {
+	
+    overlay.style.display = "none";
+	document.body.classList.remove("iframe-open");
+    frame.src = "";
+}
+
+function resetInactivity() {
+
+    clearTimeout(inactivityTimer);
+    clearInterval(countdownInterval);
+
+    let remaining = 10;
+
+    console.log(`Ritorno alla home tra ${remaining} secondi`);
+
+    countdownInterval = setInterval(() => {
+
+        remaining--;
+
+        console.log(
+            `Ritorno alla home tra ${remaining} secondi`
+        );
+
+    }, 1000);
+
+    inactivityTimer = setTimeout(() => {
+
+        clearInterval(countdownInterval);
+
+        console.log("Chiusura iframe");
+
+        closeIframe();
+
+    }, 10000);
+}
+
+window.addEventListener('message', (event) => {
+
+
+    if(event.data === "closeIframe"){
+        closeIframe();
+    }
+
+
+    if(event.data?.type === "activity"){
+        resetInactivity();
+    }
+
+});
+
+overlay.addEventListener("click", resetInactivity);
+overlay.addEventListener("touchstart", resetInactivity);
+window.addEventListener("message", function(event){
+
+
+    if(event.data.type === "activity"){
+
+        console.log("timer resettato");
+
+        resetInactivity();
+
+    }
+
+
+    if(event.data === "closeIframe"){
+
+        closeIframe();
+
+    }
+
+
+});
+
+</script>
+
+</body>
+</html>
