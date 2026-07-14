@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Descrizione Percorso</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Inter,sans-serif;
+    background:#fafafa;
+    color:#333;
+    line-height:1.7;
+}
+
+.hero{
+
+    height:400px;
+    background:url("https://picsum.photos/1600/900") center/cover;
+    position:relative;
+}
+
+.hero::after{
+
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.45);
+
+}
+
+.hero-content{
+
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    color:white;
+    z-index:2;
+    text-align:center;
+
+}
+
+.hero h1{
+
+    font-size:3rem;
+}
+
+.hero p{
+
+    font-size:1.2rem;
+}
+
+.container{
+
+    width:min(1200px,95%);
+    margin:auto;
+    padding:60px 0;
+
+}
+
+section{
+
+    margin-bottom:70px;
+
+}
+
+h2{
+
+    margin-bottom:20px;
+    color:#305d42;
+
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:30px;
+
+}
+
+.card{
+
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.card img{
+
+    width:100%;
+    height:220px;
+    object-fit:cover;
+
+}
+
+.card div{
+
+    padding:20px;
+
+}
+
+.gallery{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+
+}
+
+.gallery img{
+
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+}
+
+td{
+
+    padding:15px;
+    border-bottom:1px solid #ddd;
+
+}
+
+.info{
+
+    background:#f2f2f2;
+    padding:30px;
+    border-radius:10px;
+}
+
+iframe{
+
+    width:100%;
+    height:500px;
+    border:none;
+    border-radius:12px;
+
+}
+
+footer{
+
+    text-align:center;
+    padding:30px;
+    color:#777;
+}
+
+</style>
+
+</head>
+<body>
+	<h1 data-lang="titolo"></h1>
+	
+	<p data-lang="descrizione"></p>
+	
+	<button onclick="changeLanguage('it')">🇮🇹</button>
+	<button onclick="changeLanguage('en')">🇬🇧</button>
+	<button onclick="changeLanguage('fr')">🇫🇷</button>
+	<div class="hero">
+	
+		<div class="hero-content">
+		
+		<h1>Mulino del Principe</h1>
+		
+		<p>Un viaggio tra storia, natura e tradizioni.</p>
+		
+		</div>
+	
+	</div>
+	
+	<div class="container">
+	
+		<section>
+		
+			<h2>Descrizione</h2>
+			
+			<p>
+			
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae lacus vel ligula
+				malesuada elementum. Nulla facilisi. Donec ut sapien vitae lectus gravida
+				fermentum.
+			
+			</p>
+		
+		</section>
+		
+		<section>
+		
+			<h2>Punti di Interesse</h2>
+			
+			<div class="grid">
+			
+				<div class="card">
+				
+				<img src="https://picsum.photos/600/400?1">
+				
+				<div>
+				
+					<h3>Torre</h3>
+					
+					<p>La torre principale domina tutta la valle.</p>
+				
+				</div>
+			
+				</div>
+			
+				<div class="card">
+				
+				<img src="https://picsum.photos/600/400?2">
+				
+					<div>
+					
+						<h3>Mura</h3>
+						
+						<p>Le antiche mura conservano ancora la loro imponenza.</p>
+					
+					</div>
+				
+				</div>
+			
+				<div class="card">
+				
+					<img src="https://picsum.photos/600/400?3">
+					
+					<div>
+					
+						<h3>Panorama</h3>
+						
+						<p>Vista mozzafiato sul Parco Nazionale.</p>
+					
+					</div>
+				
+				</div>
+			
+			</div>
+		
+		</section>
+		
+		<section>
+		
+			<h2>Galleria</h2>
+			
+			<div class="gallery">
+			
+				<img src="https://picsum.photos/500/500?4">
+				<img src="https://picsum.photos/500/500?5">
+				<img src="https://picsum.photos/500/500?6">
+				<img src="https://picsum.photos/500/500?7">
+			
+			</div>
+		
+		</section>
+		
+		<section>
+		
+			<h2>Scheda Tecnica</h2>
+			
+			<table>
+			
+				<tr>
+				
+				<td>Periodo</td>
+				
+				<td>XI secolo</td>
+				
+				</tr>
+				
+				<tr>
+				
+				<td>Altitudine</td>
+				
+				<td>620 m</td>
+				
+				</tr>
+				
+				<tr>
+				
+				<td>Accessibilità</td>
+				
+				<td>Facile</td>
+				
+				</tr>
+				
+				<tr>
+				
+				<td>Tempo di visita</td>
+				
+				<td>45 minuti</td>
+				
+				</tr>
+			
+			</table>
+		
+		</section>
+		
+		<section>
+		
+			<div class="info">
+			
+				<h2>Curiosità</h2>
+				
+				<p>
+				
+					Secondo la tradizione popolare il castello sarebbe stato costruito su
+					una precedente fortificazione romana.
+					
+				</p>
+			
+			</div>
+		
+		</section>
+	
+	</div>
+<script>
+function sendActivity(){
+
+    console.log("attività libro");
+
+    parent.postMessage(
+        {
+            type:"activity"
+        },
+        "*"
+    );
+}
+
+
+document.addEventListener("pointerdown", sendActivity);
+
+document.addEventListener("pointermove", sendActivity);
+
+document.addEventListener("touchstart", sendActivity);
+
+document.addEventListener("wheel", sendActivity);
+</script>
+</body>
+</html>

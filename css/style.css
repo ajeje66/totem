@@ -1,0 +1,450 @@
+/* ==========================
+   RESET
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    font-family:'Inter',sans-serif;
+
+    background:#f4f6f8;
+
+    color:#2d2d2d;
+
+    line-height:1.7;
+
+    overflow-x:hidden;
+
+}
+
+/* ==========================
+   VARIABILI
+========================== */
+
+:root{
+
+    --primary:#24553b;
+    --secondary:#d9b44a;
+    --text:#333;
+    --background:#f4f6f8;
+    --card:#ffffff;
+    --shadow:0 10px 30px rgba(0,0,0,.12);
+    --radius:18px;
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+header{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:999;
+
+    background:white;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+
+}
+
+/* ==========================
+   LINGUE
+========================== */
+
+.language-selector{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:15px;
+
+    padding:15px;
+
+}
+.language-selector img{
+	height:15px;
+	width: 15px;
+}
+
+.language-selector button{
+
+    width:55px;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    cursor:pointer;
+
+    font-size:28px;
+
+    transition:.3s;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.12);
+
+}
+
+.language-selector button:hover{
+
+    transform:scale(1.12);
+
+}
+
+.language-selector button.active{
+
+    background:var(--secondary);
+
+}
+
+/* ==========================
+   HERO
+========================== */
+
+.hero{
+
+    position:relative;
+
+    width:100%;
+
+    height:550px;
+
+    overflow:hidden;
+
+}
+
+.hero-image{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.hero-overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:white;
+
+    text-align:center;
+
+    padding:20px;
+
+}
+
+.hero-overlay h1{
+
+    font-size:4rem;
+
+    margin-bottom:20px;
+
+}
+
+.hero-overlay p{
+
+    font-size:1.3rem;
+
+    max-width:800px;
+
+}
+
+/* ==========================
+   CONTENITORE
+========================== */
+
+.container{
+
+    width:min(1200px,94%);
+
+    margin:auto;
+
+    padding:70px 0;
+
+}
+
+/* ==========================
+   TITOLI
+========================== */
+
+h2{
+
+    color:var(--primary);
+
+    margin-bottom:30px;
+
+    font-size:2rem;
+
+    position:relative;
+
+}
+
+h2::after{
+
+    content:"";
+
+    width:90px;
+
+    height:4px;
+
+    background:var(--secondary);
+
+    display:block;
+
+    margin-top:10px;
+
+}
+
+/* ==========================
+   PARAGRAFI
+========================== */
+
+p{
+
+    font-size:1.1rem;
+
+}
+
+/* ==========================
+   CARD
+========================== */
+
+.card{
+
+    background:var(--card);
+
+    padding:35px;
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+}
+
+/* ==========================
+   GALLERIA
+========================== */
+
+.gallery{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+    gap:20px;
+
+}
+
+.gallery img{
+
+    width:100%;
+
+    height:260px;
+
+    object-fit:cover;
+
+    border-radius:15px;
+
+    cursor:pointer;
+
+    transition:.4s;
+
+    box-shadow:var(--shadow);
+
+}
+
+.gallery img:hover{
+
+    transform:scale(1.04);
+
+}
+
+/* ==========================
+   TABELLA
+========================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    background:white;
+
+    box-shadow:var(--shadow);
+
+    border-radius:var(--radius);
+
+    overflow:hidden;
+
+}
+
+td{
+
+    padding:18px;
+
+    border-bottom:1px solid #eee;
+
+}
+
+tr:nth-child(even){
+
+    background:#fafafa;
+
+}
+
+/* ==========================
+   VIDEO
+========================== */
+
+video{
+
+    width:100%;
+
+    border-radius:18px;
+
+    box-shadow:var(--shadow);
+
+}
+
+/* ==========================
+   FOOTER
+========================== */
+
+footer{
+
+    margin-top:80px;
+
+    background:var(--primary);
+
+    color:white;
+
+    text-align:center;
+
+    padding:35px;
+
+}
+
+/* ==========================
+   ANIMAZIONI
+========================== */
+
+.hero,
+.container,
+.card,
+.gallery img{
+
+    animation:fadeUp .8s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(40px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media(max-width:900px){
+
+.hero{
+
+height:420px;
+
+}
+
+.hero-overlay h1{
+
+font-size:2.7rem;
+
+}
+
+.hero-overlay p{
+
+font-size:1rem;
+
+}
+
+}
+
+@media(max-width:600px){
+
+.language-selector{
+
+flex-wrap:wrap;
+
+}
+
+.hero{
+
+height:320px;
+
+}
+
+.hero-overlay h1{
+
+font-size:2rem;
+
+}
+
+.gallery{
+
+grid-template-columns:1fr;
+
+}
+
+.container{
+
+padding:45px 0;
+
+}
+
+}
